@@ -1,4 +1,5 @@
-#include "math.h"
+#include <stdio.h>
+#include <math.h>
 
 int use_pt(float depth) {
     return (depth > 0.2) && (depth < 0.7);
@@ -54,6 +55,9 @@ void build_pc(float * data, int data_len, float * output, float d, int w, int h)
     int u, v;
     float depth;
 
+    vec3 vpt;
+    vec3 r;
+
     vec3 * out_pts = (vec3 *) output;
 
     vec3 origin;
@@ -63,18 +67,13 @@ void build_pc(float * data, int data_len, float * output, float d, int w, int h)
 
     for (u = 0; u < w; u++) {
         for (v = 0; v < h; v++) {
-            depth = data[v * w + h];
+            depth = data[u * h + v];
 
-            if (use_pt(depth)) {
-                float xp = (u - w/2) / (float)w;
-                float yp = (h - h/2) / (float)w;
-
-                vec3 vpt;
-                vpt.x = xp;
-                vpt.y = yp;
+            if (use_pt(depth)) {                
+                vpt.x = (u - w/2) / (float)w;
+                vpt.y = (h - h/2) / (float)w;
                 vpt.z = 0;
 
-                vec3 r;
                 sub(&r, &vpt, &origin);
                 normalize(&r);
                 scale(&r, depth);

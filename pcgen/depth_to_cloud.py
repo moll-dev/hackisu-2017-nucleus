@@ -2,17 +2,22 @@
 
 from PIL import Image
 import numpy as np
-import calibkinect
-import pcl
+#import calibkinect
+#import pcl
 #from pcl import registration
+
+#import matplotlib.pyplot as plt
+
+import ctypes
+
+libpcgen = ctypes.cdll.LoadLibrary('./libpcgen.so')
 
 def main():
         
-    img = Image.open("out.png")
+    img = Image.open("test.png")
     #img = Image.open("images/capture745d.jpg")
 
-    depth = np.array(img)
-    print(depth[2][2])
+    depth = np.array(img, dtype=np.float32)
     np_pc = depth_to_cloud(depth, 10)
     
     point_cloud  = pcl.PointCloud(np_pc)
@@ -22,9 +27,6 @@ def main():
     fil.set_std_dev_mul_thresh (1.0)
     
     pcl.save(point_cloud, "output0.ply")
-    #array = get_point_cloud(depth)
-    #img.show()
-    #point_cloud = pcl.PointCloud(array, dtype=np.float32)
 
 def depth_to_cloud(depth, dist):
 
@@ -33,34 +35,19 @@ def depth_to_cloud(depth, dist):
     else:
         isPng = False
 
+    depth = depth / 255.0
+
+    print(depth.shape)
     w = depth.shape[1]
     h = depth.shape[0]
+
+    depth.flatten()
+    num_pts = libpcgen.get_num_points(ctypes.c_void_p(depth.ctypes.data), ctypes.c_int(w*h))
+    print(num_pts)
+    out_pts = np.zeros((num_pts * 3), dtype=np.float32)
+    libpcgen.build_pc(ctypes.c_void_p(depth.ctypes.data), ctypes.c_int(w*h), ctypes.c_void_p(out_pts.ctypes.data), ctypes.c_float(dist), ctypes.c_int(w), ctypes.c_int(h))
     
-    dist_ray = np.array([0,0,dist])
-    output = []
-    float_w = float(w)
-
-    for u in range(h):
-        for v in range(w):
-            u2 = u - w/2
-            v2 = v - h/2
-            x_p = u2 / float_w
-            y_p = v2 / float_w
-
-            if isPng:
-                d = depth[u][v] / 255.0
-            else:
-                d = depth[u][v][0] / 255.0
-                
-            xy_ray = np.array([x_p, y_p, 0])
-            r = (xy_ray - dist_ray) / np.linalg.norm(xy_ray - dist_ray)
-            ray = xy_ray + (d) * r 
-            ray[2] = ray[2] * .2
-
-            if  .2 < d < .7:
-                output.append(ray)
-    
-    return np.array(output, dtype=np.float32)
+    return out_pts.reshape((num_pts, 3))
 
 if __name__ == "__main__":
     main()
