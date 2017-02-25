@@ -4,13 +4,14 @@ from pcl.registration import icp
 
 def main():
     
-    point_cloud_0 = pcl.load("data/bunny/bun0.pcd")
+    point_cloud_0 = pcl.load("data/bun000.ply")
     point_cloud_1 = pcl.load("data/bunny/bun1.pcd")
     point_cloud_2 = pcl.load("data/bunny/bun2.pcd")
     point_cloud_3 = pcl.load("data/bunny/bun3.pcd")
 
     arr = np.asarray(point_cloud_1)
-    #print(arr[:20])
+    
+    print(arr.shape)
 
     print("Loaded Point Clouds")
     #converged, transf, estimate, fitness = icp(point_cloud_1, point_cloud_2)
