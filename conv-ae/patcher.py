@@ -22,8 +22,10 @@ class Patcher():
     @classmethod
     def from_image(cls, _img_file, _lbl_file, _dim=(32,32), _stride=(4,4)):
         img = Image.open(_img_file)
-        img = img.resize((754, 424), Image.ANTIALIAS)
-        img = img.crop((121, 0, 633, 424))
+        d0, d1 = img.size[0], img.size[1]
+        img = img.resize((int(d0/2.0), int(d1/2.0)))
+        #img = img.resize((754, 424), Image.ANTIALIAS)
+        #img = img.crop((121, 0, 633, 424))
 
         img_arr = np.array(img, dtype=np.float32)/255.0
 

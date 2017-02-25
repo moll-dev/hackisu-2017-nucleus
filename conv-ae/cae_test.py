@@ -12,7 +12,7 @@ from PIL import ImageFilter, Image
 import scipy.misc as misc
 
 data_path = 'C:\\Users\\micha\\OneDrive\\Documents\\hackisu2017'
-img_path = 'C:\\Users\\micha\\Pictures\\Kinect_Capture_005450'
+img_path = 'C:\\Users\\micha\\Pictures'
 
 
 patch_size = 200
@@ -43,7 +43,7 @@ autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 autoencoder.load_weights(data_path + '\\cae_weights.h5')
 
 print('Creating test patcher with dim=(32, 32).')
-test_img = img_path + '\\capture736c.jpg'
+test_img = img_path + '\\IMG_20170225_072004.jpg'
 patcher_test = Patcher.from_image(test_img, None, _dim=(patch_size, patch_size), _stride=(64, 64))
 
 print(patcher_test.img_arr.shape)
