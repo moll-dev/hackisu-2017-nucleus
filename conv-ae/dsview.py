@@ -65,8 +65,8 @@ class App:
             return
 
         with h5py.File(fname) as f:
-            self.x_train = np.array(f['images'])
-            self.y_train = np.array(f['labels'])
+            self.x_train = np.array(f['x_train'])
+            self.y_train = np.array(f['y_train'])
 
         print('x_train shape: {}'.format(self.x_train.shape))
         print('y_train shape: {}'.format(self.y_train.shape))

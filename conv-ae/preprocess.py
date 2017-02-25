@@ -14,7 +14,7 @@ savename = sys.argv[1]
 #data_path = 'C:\\nucleus\\'  + dataset
 
 data_path = 'C:\\Users\\micha\\Pictures\\Kinect_Capture_005450'
-patch_size = 512
+patch_size = 200
 
 imgs = os.listdir(data_path)
 

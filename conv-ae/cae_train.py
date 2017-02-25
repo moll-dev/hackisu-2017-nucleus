@@ -9,9 +9,9 @@ import random
 from sklearn.feature_extraction import image
 import h5py
 
-data_path = 'C:\\scratch'
+data_path = '.\\'
 
-patch_size = 256
+patch_size = 200
 
 input_img = Input(shape=(patch_size, patch_size, 3))
 
@@ -37,15 +37,15 @@ print(autoencoder.summary())
 autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
 print('Loading data...')
-with h5py.File(data_path + '\\train_25_256.h5') as f:
-    x_train = np.array(f['images'])
-    y_train = np.array(f['labels'])
+with h5py.File(data_path + '\\dataset.h5') as f:
+    x_train = np.array(f['x_train'])
+    y_train = np.array(f['y_train'])
 
 ## Train the AE
 print('Training...')
 autoencoder.fit(x_train, y_train,
                 nb_epoch=10,
-                batch_size=32,
+                batch_size=16,
                 shuffle=True)
                 #callbacks=[TensorBoard(log_dir='.\\tensorboard')])
 

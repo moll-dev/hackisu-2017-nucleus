@@ -25,13 +25,13 @@ class Patcher():
         img = img.resize((754, 424), Image.ANTIALIAS)
         img = img.crop((121, 0, 633, 424))
 
-        img_arr = np.array(img)
+        img_arr = np.array(img, dtype=np.float32)/255.0
 
         if _lbl_file == None:
             lbl_arr = None
         else:
             lbl = Image.open(_lbl_file)
-            lbl_arr = np.array(lbl)/255.0
+            lbl_arr = np.array(lbl, dtype=np.float32)[:,:,0]/255.0
 
         assert img_arr.shape[0] == lbl_arr.shape[0]
         assert img_arr.shape[1] == lbl_arr.shape[1]
