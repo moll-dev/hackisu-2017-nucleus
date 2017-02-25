@@ -1,0 +1,19 @@
+ply 
+format ascii 1.0 
+comment file created by Microsoft Kinect Fusion 
+element vertex 6 
+property float x 
+property float y 
+property float z 
+property uchar red 
+property uchar green 
+property uchar blue 
+element face 0 
+property list uchar int vertex_index 
+end_header 
+-0.282411 -0.240234 -0.505859 191 188 189 
+-0.279297 -0.240234 -0.503913 195 194 194 
+-0.279297 -0.239977 -0.505859 176 175 175 
+-0.275391 -0.240234 -0.503192 200 198 199 
+-0.279297 -0.239977 -0.505859 176 175 175 
+-0.279297 -0.240234 -0.503913 195 194 194
