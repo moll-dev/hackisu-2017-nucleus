@@ -9,12 +9,13 @@ import random
 from sklearn.feature_extraction import image
 import h5py
 from PIL import ImageFilter, Image
+import scipy.misc as misc
 
-data_path = 'C:\\scratch'
-img_path = 'E:\\Users\\micha\\OneDrive\\Documents\\School\\Undergrad\\Research\\corn\\CAE\\test_field_images'
+data_path = 'C:\\Users\\micha\\OneDrive\\Documents\\hackisu2017'
+img_path = 'C:\\Users\\micha\\Pictures\\Kinect_Capture_005450'
 
 
-patch_size = 256
+patch_size = 200
 input_img = Input(shape=(patch_size, patch_size, 3))
 
 x = Convolution2D(32, 3, 3, activation='relu', border_mode='same')(input_img)
@@ -42,16 +43,17 @@ autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 autoencoder.load_weights(data_path + '\\cae_weights.h5')
 
 print('Creating test patcher with dim=(32, 32).')
-test_img = img_path + '\\DSCN1853.JPG'
+test_img = img_path + '\\capture736c.jpg'
 patcher_test = Patcher.from_image(test_img, None, _dim=(patch_size, patch_size), _stride=(64, 64))
+
 print(patcher_test.img_arr.shape)
 print('Done.')
 
 def predictor(_patches):
     return autoencoder.predict(_patches)
 
-pred_label = patcher_test.predict(predictor, frac=0.33)
-pred_label = pred_label / 9.0
+pred_label = patcher_test.predict(predictor, frac=1.0)
+pred_label = pred_label
 pred_label = np.clip(pred_label, 0.0, 1.0)
 
 plt.hist(pred_label.flatten(), 50)
@@ -60,9 +62,7 @@ plt.show()
 #pred_label = np.where(pred_label > 9.0, 9)
 #pred_label = np.rint(pred_label-0.49)
 
-img = Image.fromarray(pred_label)
-img = img.convert('L')
-img = img.filter(ImageFilter.BLUR)
+misc.imsave('test.png', pred_label)
 
 plt.imshow(pred_label)
 plt.show() 
