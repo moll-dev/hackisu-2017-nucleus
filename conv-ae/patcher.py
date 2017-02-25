@@ -22,18 +22,8 @@ class Patcher():
     @classmethod
     def from_image(cls, _img_file, _lbl_file, _dim=(32,32), _stride=(4,4)):
         img = Image.open(_img_file)
-
-        for orientation in ExifTags.TAGS.keys() : 
-            if ExifTags.TAGS[orientation]=='Orientation' : break 
-
-        exif=dict(img._getexif().items())
-
-        if exif[orientation] == 3 : 
-            img=img.rotate(180, expand=True)
-        elif exif[orientation] == 6 : 
-            img=img.rotate(270, expand=True)
-        elif exif[orientation] == 8 : 
-            img=img.rotate(90, expand=True)
+        img = img.resize((754, 424), Image.ANTIALIAS)
+        img = img.crop((121, 0, 633, 424))
 
         img_arr = np.array(img)
 
@@ -42,6 +32,9 @@ class Patcher():
         else:
             lbl = Image.open(_lbl_file)
             lbl_arr = np.array(lbl)/255.0
+
+        assert img_arr.shape[0] == lbl_arr.shape[0]
+        assert img_arr.shape[1] == lbl_arr.shape[1]
 
         return cls(img_arr, lbl_arr, _dim, _stride)
 
@@ -74,12 +67,9 @@ class Patcher():
             else:
                 return patch
 
-    def patchify(self, random=False, max_patches=100, valid=None):
+    def patchify(self):
         if self.patches != None:
             return self.patches, self.labels
-
-        if valid == None:
-            valid = lambda pxl: True
 
         self.patches = []
         self.labels = []
@@ -88,9 +78,11 @@ class Patcher():
 
         d0 = self.dim[0]
         d1 = self.dim[1]
+        s0 = self.stride[0]
+        s1 = self.stride[1]
 
-        for i0 in range(0, shape[0] - d0, d0): 
-            for i1 in range(0, shape[1] - d1, d1):
+        for i0 in range(0, shape[0] - d0, s0): 
+            for i1 in range(0, shape[1] - d1, s1):
                 label_patch = self.create_patch([i0, i1], label=True)
                 if np.sum(label_patch.flatten()) > 0  or rng.randint(0,100) < 25:
                     self.patches.append(self.create_patch([i0, i1], label=False))
