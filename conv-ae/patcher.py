@@ -33,8 +33,8 @@ class Patcher():
             lbl = Image.open(_lbl_file)
             lbl_arr = np.array(lbl, dtype=np.float32)[:,:,0]/255.0
 
-        assert img_arr.shape[0] == lbl_arr.shape[0]
-        assert img_arr.shape[1] == lbl_arr.shape[1]
+            assert img_arr.shape[0] == lbl_arr.shape[0]
+            assert img_arr.shape[1] == lbl_arr.shape[1]
 
         return cls(img_arr, lbl_arr, _dim, _stride)
 
@@ -45,11 +45,21 @@ class Patcher():
         d0 = self.dim[0]
         d1 = self.dim[1]
 
+        shape = self.img_arr.shape
+
         d00 = pos[0]
         d01 = pos[0] + d0
 
+        if d01 > shape[0]:
+            d00 = d00 - (d01 - shape[0])
+            d01 = d01 - (d01 - shape[0])
+
         d10 = pos[1]
         d11 = pos[1] + d1
+
+        if d11 > shape[1]:
+            d10 = d10 - (d11 - shape[1])
+            d11 = d11 - (d11 - shape[1])
 
         if label:
             patch = self.lbl_arr[d00:d01, d10:d11]
@@ -110,17 +120,26 @@ class Patcher():
         # For small enough patch dimensions this isn't a huge deal, but still would
         # be a good idea to create a smarter algorithm here.
 
-        for i0 in range(0, shape[0] - d0 - 1, d0_stride): 
-            for i1 in range(0, shape[1] - d1 - 1, d1_stride):
+        for i0 in range(0, shape[0], d0_stride): 
+            for i1 in range(0, shape[1], d1_stride):
                 patches.append(self.create_patch([i0, i1], label=False))
 
         patches = np.array(patches)
         preds = predictor(patches)
 
         i = 0
-        for i0 in range(0, shape[0] - d0 - 1, d0_stride): 
-            for i1 in range(0, shape[1] - d1 - 1, d1_stride):
-                pred_label[i0:i0+d0, i1:i1+d1] += preds[i].reshape((d0, d1))
+        for i0 in range(0, shape[0], d0_stride): 
+            for i1 in range(0, shape[1], d1_stride):
+                if i0 + d0 > shape[0]:
+                    if i1 + d1 > shape[1]:
+                        pred_label[i0:, i1:] += preds[i].reshape((d0, d1))[d0 - (shape[0] - i0):, d1 - (shape[1] - i1):]
+                    else:
+                        pred_label[i0:, i1:i1+d1] += preds[i].reshape((d0, d1))[d0 - (shape[0] - i0):, :]
+                elif i1 + d1 > shape[1]:
+                    pred_label[i0:i0+d0, i1:] += preds[i].reshape((d0, d1))[:, d1 - (shape[1] - i1):]
+                else:
+                    pred_label[i0:i0+d0, i1:i1+d1] += preds[i].reshape((d0, d1))
+                    
                 i = i + 1
 
         #pred_label = np.where(pred_label > 0.7, 1, 0)
