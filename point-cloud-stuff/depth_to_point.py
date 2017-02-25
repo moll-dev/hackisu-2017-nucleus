@@ -8,10 +8,12 @@ import pcl
 
 def main():
         
-    img = Image.open("images/capture736d.jpg")
+    img = Image.open("out.png")
+    #img = Image.open("images/capture745d.jpg")
 
     depth = np.array(img)
-    np_pc = depth_to_cloud(depth, 1.0)
+    print(depth[2][2])
+    np_pc = depth_to_cloud(depth, 10)
     
     point_cloud  = pcl.PointCloud(np_pc)
 
@@ -19,12 +21,18 @@ def main():
     fil.set_mean_k (50)
     fil.set_std_dev_mul_thresh (1.0)
     
-    pcl.save(fil.filter(), "output.ply")
+    pcl.save(point_cloud, "output0.ply")
     #array = get_point_cloud(depth)
     #img.show()
     #point_cloud = pcl.PointCloud(array, dtype=np.float32)
 
 def depth_to_cloud(depth, dist):
+
+    if len(depth.shape) == 2:
+        isPng = True
+    else:
+        isPng = False
+
     w = depth.shape[1]
     h = depth.shape[0]
     
@@ -39,12 +47,17 @@ def depth_to_cloud(depth, dist):
             x_p = u2 / float_w
             y_p = v2 / float_w
 
-            d = depth[u][v][0] / 255.0
+            if isPng:
+                d = depth[u][v] / 255.0
+            else:
+                d = depth[u][v][0] / 255.0
+                
             xy_ray = np.array([x_p, y_p, 0])
             r = (xy_ray - dist_ray) / np.linalg.norm(xy_ray - dist_ray)
-            ray = xy_ray + (d) * r
+            ray = xy_ray + (d) * r 
+            ray[2] = ray[2] * .2
 
-            if .2 < d < .7:
+            if  .2 < d < .7:
                 output.append(ray)
     
     return np.array(output, dtype=np.float32)
