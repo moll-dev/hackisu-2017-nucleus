@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef __WIN32
+#define EXPORT  __declspec(dllexport)
+#else
+#define EXPORT
+#endif
+
 int use_pt(float depth) {
     return (depth > 0.2) && (depth < 0.7);
 }
 
-int get_num_points(float * data, int data_len) {
+EXPORT int get_num_points(float * data, int data_len) {
     int num_points = 0;
     int i;
 
@@ -50,7 +56,7 @@ void scale(vec3 * dst, float factor) {
     dst->z *= factor;
 }
 
-void build_pc(float * data, int data_len, float * output, float d, int w, int h) {
+EXPORT void build_pc(float * data, int data_len, float * output, float d, int w, int h) {
     int pt_idx = 0;
     int u, v;
     float depth;
