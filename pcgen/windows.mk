@@ -1,4 +1,4 @@
 
 
 libpcgen.dll:
-	@cl /MP /Felibpcgen.dll pcgen.c /link /MACHINE:X64 /DLL
+	@cl /MP /nologo /Felibpcgen.dll pcgen.c /Ox /link /MACHINE:X64 /DLL

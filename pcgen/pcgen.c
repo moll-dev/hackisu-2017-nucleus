@@ -1,14 +1,22 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifdef __WIN32
-#define EXPORT  __declspec(dllexport)
+#if defined(_WIN32) || defined(_WIN64)
+#define EXPORT __declspec(dllexport)
 #else
 #define EXPORT
 #endif
 
+float thresh_min;
+float thresh_max;
+
+EXPORT void set_bounds(float min, float max) {
+    thresh_min = min;
+    thresh_max = max;
+}
+
 int use_pt(float depth) {
-    return (depth > 0.2) && (depth < 0.7);
+    return (depth > thresh_min) && (depth < thresh_max);
 }
 
 EXPORT int get_num_points(float * data, int data_len) {
@@ -56,7 +64,7 @@ void scale(vec3 * dst, float factor) {
     dst->z *= factor;
 }
 
-EXPORT void build_pc(float * data, int data_len, float * output, float d, int w, int h) {
+EXPORT void build_pc(float * data, int data_len, float * output, float d, int w, int h, float zcale) {
     int pt_idx = 0;
     int u, v;
     float depth;
@@ -73,17 +81,19 @@ EXPORT void build_pc(float * data, int data_len, float * output, float d, int w,
 
     for (u = 0; u < w; u++) {
         for (v = 0; v < h; v++) {
-            depth = data[u * h + v];
+            depth = data[v * w + u];
 
             if (use_pt(depth)) {                
-                vpt.x = (u - w/2) / (float)w;
-                vpt.y = (h - h/2) / (float)w;
+                vpt.x = ((float)u - (float)w/2.0) / (float)w;
+                vpt.y = ((float)v - (float)h/2.0) / (float)w;
                 vpt.z = 0;
 
                 sub(&r, &vpt, &origin);
                 normalize(&r);
                 scale(&r, depth);
                 add(&out_pts[pt_idx], &vpt, &r);
+
+                out_pts[pt_idx].z *= zcale;
 
                 pt_idx++;
             }
